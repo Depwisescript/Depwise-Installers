@@ -69,7 +69,7 @@ main() {
     apt update -y && apt install -y curl wget || { log_error "Error al instalar dependencias base."; exit 1; }
 
     log_info "Descargando el binario del Panel..."
-    wget -qO /usr/local/bin/menu "https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/menu" || { log_error "Error al descargar el binario."; exit 1; }
+    wget -qO /usr/local/bin/menu "https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/menu?t=$(date +%s)" || { log_error "Error al descargar el binario."; exit 1; }
     chmod +x /usr/local/bin/menu
 
     echo -e "${GREEN}=================================================="

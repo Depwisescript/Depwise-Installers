@@ -91,7 +91,7 @@ install_bot() {
 
     # 2. Descargar Binario del Bot
     log_info "Descargando el Bot en Go (Binario Precompilado Oficial)..."
-    wget -qO /usr/local/bin/depwise-bot "https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/depwise-bot" || { log_error "Error al descargar el bot."; exit 1; }
+    wget -qO /usr/local/bin/depwise-bot "https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/depwise-bot?t=$(date +%s)" || { log_error "Error al descargar el bot."; exit 1; }
     chmod +x /usr/local/bin/depwise-bot
 
     # 3. Compilar BadVPN nativamente (Repositorio Público, sin tokens)
