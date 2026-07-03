@@ -45,8 +45,12 @@ main() {
         read -p "Introduce tu Dominio Principal (Enter para omitir): " MAIN_DOMAIN
     fi
 
+    log_info "Instalando y actualizando dependencias de red..."
+    apt update -y && apt install -y curl wget ca-certificates || { log_error "Error al instalar dependencias base."; exit 1; }
+    update-ca-certificates || true
+
     log_info "Verificando Key en la base de datos..."
-    if ! KEY_RESPONSE=$(curl -4 -s --http1.1 --tls-max 1.2 -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" || wget -qO- --timeout=10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json"); then
+    if ! KEY_RESPONSE=$(curl -k -4 -s --http1.1 --tls-max 1.2 -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" || wget --no-check-certificate -qO- --timeout=10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json"); then
         log_error "Error de conexión con Firebase. Revisa tu internet o DNS."
         exit 1
     fi
@@ -56,7 +60,7 @@ main() {
     fi
 
     log_info "Key válida. Quemando Key..."
-    curl -4 -s -X DELETE "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" > /dev/null || true
+    curl -k -4 -s -X DELETE "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" > /dev/null || true
 
     # Guardar el dominio inicial en config si existe
     if [ -n "$MAIN_DOMAIN" ]; then
@@ -64,9 +68,6 @@ main() {
     else
         echo "{\"main_domain\": \"\"}" > /root/depwise_config.json
     fi
-
-    log_info "Instalando dependencias base..."
-    apt update -y && apt install -y curl wget || { log_error "Error al instalar dependencias base."; exit 1; }
 
     log_info "Descargando el binario del Panel..."
     wget -qO /usr/local/bin/menu "https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/menu?t=$(date +%s)" || { log_error "Error al descargar el binario."; exit 1; }

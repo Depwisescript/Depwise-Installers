@@ -44,8 +44,12 @@ install_bot() {
     # Limpiar posibles caracteres ocultos (CRLF, espacios) de copiar y pegar
     INSTALL_KEY=$(echo "$INSTALL_KEY" | tr -d '\r' | tr -d '\n' | tr -d ' ')
     
+    log_info "Instalando y actualizando dependencias de red..."
+    apt update -y && apt install -y curl wget ca-certificates || { log_error "Error al instalar dependencias base."; exit 1; }
+    update-ca-certificates || true
+
     log_info "Verificando Key en la base de datos..."
-    if ! KEY_RESPONSE=$(curl -4 -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json"); then
+    if ! KEY_RESPONSE=$(curl -k -4 -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" || wget --no-check-certificate -qO- --timeout=10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json"); then
         log_error "Error de conexión con Firebase. Revisa tu internet o DNS."
         exit 1
     fi
