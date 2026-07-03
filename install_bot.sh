@@ -45,7 +45,7 @@ install_bot() {
     INSTALL_KEY=$(echo "$INSTALL_KEY" | tr -d '\r' | tr -d '\n' | tr -d ' ')
     
     log_info "Verificando Key en la base de datos..."
-    if ! KEY_RESPONSE=$(curl -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json"); then
+    if ! KEY_RESPONSE=$(curl -4 -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json"); then
         log_error "Error de conexión con Firebase. Revisa tu internet o DNS."
         exit 1
     fi
@@ -55,7 +55,7 @@ install_bot() {
     fi
     
     log_info "Key válida. Quemando Key..."
-    curl -s -X DELETE "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" > /dev/null
+    curl -4 -s -X DELETE "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" > /dev/null || true
     
     if [ -f "$ENV_FILE" ]; then
         log_info "Cargando credenciales existentes desde $ENV_FILE..."

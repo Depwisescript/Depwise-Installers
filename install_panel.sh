@@ -46,7 +46,7 @@ main() {
     fi
 
     log_info "Verificando Key en la base de datos..."
-    if ! KEY_RESPONSE=$(curl -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json"); then
+    if ! KEY_RESPONSE=$(curl -4 -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json"); then
         log_error "Error de conexión con Firebase. Revisa tu internet o DNS."
         exit 1
     fi
@@ -56,7 +56,7 @@ main() {
     fi
 
     log_info "Key válida. Quemando Key..."
-    curl -s -X DELETE "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" > /dev/null || true
+    curl -4 -s -X DELETE "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" > /dev/null || true
 
     # Guardar el dominio inicial en config si existe
     if [ -n "$MAIN_DOMAIN" ]; then
