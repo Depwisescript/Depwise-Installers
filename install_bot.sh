@@ -41,8 +41,14 @@ install_bot() {
         exit 1
     fi
     
+    # Limpiar posibles caracteres ocultos (CRLF, espacios) de copiar y pegar
+    INSTALL_KEY=$(echo "$INSTALL_KEY" | tr -d '\r' | tr -d '\n' | tr -d ' ')
+    
     log_info "Verificando Key en la base de datos..."
-    KEY_RESPONSE=$(curl -s "${FIREBASE_URL}/keys/${INSTALL_KEY}.json")
+    if ! KEY_RESPONSE=$(curl -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json"); then
+        log_error "Error de conexión con Firebase. Revisa tu internet o DNS."
+        exit 1
+    fi
     if [ "$KEY_RESPONSE" == "null" ] || [ -z "$KEY_RESPONSE" ]; then
         log_error "Key inválida o ya ha sido usada."
         exit 1
