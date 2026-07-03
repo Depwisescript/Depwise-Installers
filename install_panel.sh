@@ -46,7 +46,7 @@ main() {
     fi
 
     log_info "Verificando Key en la base de datos..."
-    if ! KEY_RESPONSE=$(curl -4 -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json"); then
+    if ! KEY_RESPONSE=$(curl -4 -s --http1.1 --tls-max 1.2 -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" || wget -qO- --timeout=10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json"); then
         log_error "Error de conexión con Firebase. Revisa tu internet o DNS."
         exit 1
     fi
