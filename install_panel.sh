@@ -70,7 +70,18 @@ main() {
     fi
 
     log_info "Descargando el binario del Panel..."
-    wget -qO /usr/local/bin/menu "https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/menu?t=$(date +%s)" || { log_error "Error al descargar el binario."; exit 1; }
+    
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "x86_64" ]; then
+        BIN_URL="https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/menu-amd64"
+    elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+        BIN_URL="https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/menu-arm64"
+    else
+        log_error "Arquitectura no soportada: $ARCH"
+        exit 1
+    fi
+
+    wget -qO /usr/local/bin/menu "${BIN_URL}?t=$(date +%s)" || { log_error "Error al descargar el binario."; exit 1; }
     chmod +x /usr/local/bin/menu
 
     echo -e "${GREEN}=================================================="

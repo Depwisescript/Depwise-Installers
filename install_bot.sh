@@ -96,7 +96,18 @@ install_bot() {
     # 2. Descargar Binario del Bot
     log_info "Descargando el Bot en Go (Binario Precompilado Oficial)..."
     systemctl stop depwise 2>/dev/null || true
-    wget -qO /usr/local/bin/depwise-bot "https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/depwise-bot?t=$(date +%s)" || { log_error "Error al descargar el bot."; exit 1; }
+    
+    ARCH=$(uname -m)
+    if [ "$ARCH" = "x86_64" ]; then
+        BIN_URL="https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/depwise-bot-amd64"
+    elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+        BIN_URL="https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/depwise-bot-arm64"
+    else
+        log_error "Arquitectura no soportada: $ARCH"
+        exit 1
+    fi
+
+    wget -qO /usr/local/bin/depwise-bot "${BIN_URL}?t=$(date +%s)" || { log_error "Error al descargar el bot."; exit 1; }
     chmod +x /usr/local/bin/depwise-bot
 
     # 3. Compilar BadVPN nativamente (Repositorio Público, sin tokens)
