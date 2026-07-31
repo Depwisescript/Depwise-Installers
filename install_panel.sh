@@ -50,17 +50,28 @@ main() {
     update-ca-certificates || true
 
     log_info "Verificando Key en la base de datos..."
-    if ! KEY_RESPONSE=$(curl -k -4 -s --http1.1 --tls-max 1.2 -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" || wget --no-check-certificate -qO- --timeout=10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json"); then
+    KEY_RESPONSE=$(curl -4 -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json")
+    if [ -z "$KEY_RESPONSE" ]; then
+        KEY_RESPONSE=$(curl -6 -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json")
+    fi
+    if [ -z "$KEY_RESPONSE" ]; then
+        KEY_RESPONSE=$(wget -qO- --timeout=10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json")
+    fi
+    if [ -z "$KEY_RESPONSE" ]; then
+        KEY_RESPONSE=$(curl -k -4 -s --http1.1 --tls-max 1.2 -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json")
+    fi
+
+    if [ -z "$KEY_RESPONSE" ]; then
         log_error "Error de conexión con Firebase. Revisa tu internet o DNS."
         exit 1
     fi
-    if [ "$KEY_RESPONSE" == "null" ] || [ -z "$KEY_RESPONSE" ]; then
+    if [ "$KEY_RESPONSE" == "null" ] || echo "$KEY_RESPONSE" | grep -q "Permission denied"; then
         log_error "Key inválida o ya ha sido usada."
         exit 1
     fi
 
     log_info "Key válida. Quemando Key..."
-    curl -k -4 -s -X DELETE "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" > /dev/null || true
+    curl -4 -s -X DELETE "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" > /dev/null || curl -6 -s -X DELETE "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" > /dev/null || true
 
     # Guardar el dominio inicial en config si existe
     if [ -n "$MAIN_DOMAIN" ]; then
