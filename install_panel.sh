@@ -38,8 +38,8 @@ main() {
         exit 1
     fi
     
-    # Limpiar posibles caracteres ocultos (CRLF, espacios) de copiar y pegar
-    INSTALL_KEY=$(echo "$INSTALL_KEY" | tr -d '\r' | tr -d '\n' | tr -d ' ')
+    # Limpiar posibles caracteres ocultos o retornos de carro al pegar
+    INSTALL_KEY=$(echo "$INSTALL_KEY" | tr -d '\r' | tr -d ' ' | tr -d '\n')
 
     if [ -z "${MAIN_DOMAIN+x}" ]; then
         read -p "Introduce tu Dominio Principal (Enter para omitir): " MAIN_DOMAIN
@@ -50,15 +50,15 @@ main() {
     update-ca-certificates || true
 
     log_info "Verificando Key en la base de datos..."
-    KEY_RESPONSE=$(curl -4 -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json") || true
+    KEY_RESPONSE=$(curl -k -L -4 -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json") || true
     if [ -z "$KEY_RESPONSE" ]; then
-        KEY_RESPONSE=$(curl -6 -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json") || true
+        KEY_RESPONSE=$(curl -k -L -6 -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json") || true
     fi
     if [ -z "$KEY_RESPONSE" ]; then
-        KEY_RESPONSE=$(wget -qO- --timeout=10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json") || true
+        KEY_RESPONSE=$(wget --no-check-certificate -qO- --timeout=10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json") || true
     fi
     if [ -z "$KEY_RESPONSE" ]; then
-        KEY_RESPONSE=$(curl -k -4 -s --http1.1 --tls-max 1.2 -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json") || true
+        KEY_RESPONSE=$(curl -k -L -4 -s --http1.1 --tls-max 1.2 -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json") || true
     fi
 
     if [ -z "$KEY_RESPONSE" ]; then

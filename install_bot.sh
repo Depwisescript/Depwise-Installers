@@ -49,15 +49,15 @@ install_bot() {
     update-ca-certificates || true
 
     log_info "Verificando Key en la base de datos..."
-    KEY_RESPONSE=$(curl -4 -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json") || true
+    KEY_RESPONSE=$(curl -k -L -4 -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json") || true
     if [ -z "$KEY_RESPONSE" ]; then
-        KEY_RESPONSE=$(curl -6 -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json") || true
+        KEY_RESPONSE=$(curl -k -L -6 -s -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json") || true
     fi
     if [ -z "$KEY_RESPONSE" ]; then
-        KEY_RESPONSE=$(wget -qO- --timeout=10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json") || true
+        KEY_RESPONSE=$(wget --no-check-certificate -qO- --timeout=10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json") || true
     fi
     if [ -z "$KEY_RESPONSE" ]; then
-        KEY_RESPONSE=$(curl -k -4 -s --http1.1 --tls-max 1.2 -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json") || true
+        KEY_RESPONSE=$(curl -k -L -4 -s --http1.1 --tls-max 1.2 -m 10 "${FIREBASE_URL}/keys/${INSTALL_KEY}.json") || true
     fi
 
     if [ -z "$KEY_RESPONSE" ]; then
