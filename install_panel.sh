@@ -93,13 +93,13 @@ main() {
     ARCH=$(uname -m)
     if [ "$ARCH" == "x86_64" ]; then
         if [ "$KEY_TYPE" == "free" ]; then
-            BIN_URL="https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/menu-free-amd64"
+            BIN_URL="https://github.com/Depwisescript/-SCRIPT-DEPWISE-FREE/releases/latest/download/menu-free-amd64"
         else
             BIN_URL="https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/menu-amd64"
         fi
     elif [ "$ARCH" == "aarch64" ] || [ "$ARCH" == "arm64" ]; then
         if [ "$KEY_TYPE" == "free" ]; then
-            BIN_URL="https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/menu-free-arm64"
+            BIN_URL="https://github.com/Depwisescript/-SCRIPT-DEPWISE-FREE/releases/latest/download/menu-free-arm64"
         else
             BIN_URL="https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/menu-arm64"
         fi
