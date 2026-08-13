@@ -78,8 +78,15 @@ main() {
         KEY_TYPE="premium" # Default for old keys
     fi
 
-    log_info "Quemando Key..."
-    curl -4 -s -X DELETE "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" > /dev/null || curl -6 -s -X DELETE "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" > /dev/null || true
+    log_info "Verificando estado de la Key..."
+    if echo "$KEY_RESPONSE" | grep -q '"status":"installed"'; then
+        log_error "Esta Key ya ha sido instalada en otro servidor y no se puede reutilizar."
+        exit 1
+    fi
+
+    log_info "Quemando Key y registrando instalación..."
+    IP_ADDR=$(curl -s ifconfig.me || echo "unknown")
+    curl -s -X PATCH -d "{\"status\":\"installed\",\"ip\":\"$IP_ADDR\",\"installed_at\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" > /dev/null || true
 
     # Guardar el dominio inicial en config si existe
     if [ -n "$MAIN_DOMAIN" ]; then
