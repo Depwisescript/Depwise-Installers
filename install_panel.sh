@@ -70,7 +70,15 @@ main() {
         exit 1
     fi
 
-    log_info "Key válida. Quemando Key..."
+    log_info "Key válida. Comprobando tipo de licencia..."
+    
+    # Check if the key is "free" or "premium"
+    KEY_TYPE=$(echo "$KEY_RESPONSE" | grep -o '"type":"[^"]*"' | cut -d'"' -f4)
+    if [ -z "$KEY_TYPE" ]; then
+        KEY_TYPE="premium" # Default for old keys
+    fi
+
+    log_info "Quemando Key..."
     curl -4 -s -X DELETE "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" > /dev/null || curl -6 -s -X DELETE "${FIREBASE_URL}/keys/${INSTALL_KEY}.json" > /dev/null || true
 
     # Guardar el dominio inicial en config si existe
@@ -80,13 +88,21 @@ main() {
         echo "{\"main_domain\": \"\"}" > /root/depwise_config.json
     fi
 
-    log_info "Descargando el binario del Panel..."
+    log_info "Descargando el binario del Panel ($KEY_TYPE)..."
     
     ARCH=$(uname -m)
-    if [ "$ARCH" = "x86_64" ]; then
-        BIN_URL="https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/menu-amd64"
-    elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
-        BIN_URL="https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/menu-arm64"
+    if [ "$ARCH" == "x86_64" ]; then
+        if [ "$KEY_TYPE" == "free" ]; then
+            BIN_URL="https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/menu-free-amd64"
+        else
+            BIN_URL="https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/menu-amd64"
+        fi
+    elif [ "$ARCH" == "aarch64" ] || [ "$ARCH" == "arm64" ]; then
+        if [ "$KEY_TYPE" == "free" ]; then
+            BIN_URL="https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/menu-free-arm64"
+        else
+            BIN_URL="https://github.com/Depwisescript/Depwise-Installers/releases/latest/download/menu-arm64"
+        fi
     else
         log_error "Arquitectura no soportada: $ARCH"
         exit 1
